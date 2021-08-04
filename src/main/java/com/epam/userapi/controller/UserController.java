@@ -7,13 +7,13 @@ import java.util.Optional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.epam.userapi.model.User;
 import com.epam.userapi.repository.UserRepositoryService;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -64,9 +65,7 @@ public class UserController {
     public ResponseEntity<User> addUser(@Validated @RequestBody User user) {
 		try {
 			User newUser = service.saveUser(user);
-			HttpHeaders header = new HttpHeaders();
-			header.add("token", newUser.getToken());
-			return new ResponseEntity<User>(newUser, header, HttpStatus.OK);
+			return new ResponseEntity<User>(newUser, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -94,10 +93,9 @@ public class UserController {
 				System.out.println("No user found");
 				return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
-			Cookie cookie = new Cookie("token", newUser.getToken());
-			cookie.setMaxAge(5*60);
-			response.addCookie(cookie);
-			return new ResponseEntity<User>(newUser, HttpStatus.OK);
+			HttpHeaders header = new HttpHeaders();
+			header.add("token", newUser.getToken());
+			return new ResponseEntity<User>(newUser, header,HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
